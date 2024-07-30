@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCE Information Submission</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.carousel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.theme.default.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}"> <!-- Optional for additional custom styling -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+            function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    var accuracy = position.coords.accuracy; // Accuracy in meters
+
+                    document.getElementById('latitude').value = latitude;
+                    document.getElementById('longitude').value = longitude;
+                    document.getElementById('accuracy').value = accuracy;
+
+                    // Display map
+                    var map = L.map('map').setView([latitude, longitude], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+
+                    L.marker([latitude, longitude]).addTo(map)
+                        .bindPopup('You are here!')
+                        .openPopup();
+
+                    // Add circle to represent accuracy
+                    L.circle([latitude, longitude], {
+                        color: 'blue',
+                        fillColor: '#a1c4fd',
+                        fillOpacity: 0.2,
+                        radius: accuracy
+                    }).addTo(map)
+                        .bindPopup('Accuracy: ' + accuracy + ' meters');
+
+                 }, function(error) {
+            console.error("Error getting location: ", error);
+        }, {
+            enableHighAccuracy: true, // Request high accuracy
+            timeout: 5000, // Set timeout for the request
+            maximumAge: 0 // Don't use cached data
+        });
+    } else {
+        console.error("Geolocation is not supported by this browser.");
+    }
+}
+
+        function handleSubmit(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Perform form submission using fetch API
+            fetch('/submit', {
+                method: 'POST',
+                body: new FormData(document.querySelector('form'))
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show success message
+                    alert("Successfully submitted!");
+                    // Redirect to index page
+                    window.location.href = "/";
+                } else {
+                    alert("Submission failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("An error occurred.");
+            });
+        }
+
+        window.onload = getLocation;
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e0e0e0; /* Light grey background */
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="file"],
+        select,
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #map {
+            height: 300px;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            form {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body id="top" data-spy="scroll" data-target=".navbar-collapse" data-offset="50">
+
+
+   <!-- PRE LOADER -->
+    <section class="preloader">
+        <div class="spinner">
+            <span class="spinner-rotate"></span>
+        </div>
+    </section>
+
+
+  <!-- MENU -->
+    <section class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                </button>
+                <!-- Logo Text -->
+                <a>Agriculture and Soil Division</a>
+            </div>
+            <!-- MENU LINKS -->
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/" class="smoothScroll">Home</a></li>
+                    <li><a href="/submit" class="smoothScroll">Fill Form</a></li>
+                    <li><a href="/view_data" class="smoothScroll">View Data</a></li>
+<!--                    <li><a href="/upload_kml" class="smoothScroll">Upload KML</a></li> &lt;!&ndash; Added link &ndash;&gt;-->
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+    <h1>CCE Information Submission Form</h1>
+    <div class="form-container">
+        <form method="POST" enctype="multipart/form-data" onsubmit="handleSubmit(event)">
+
+            <input type="hidden" id="latitude" name="latitude" value="">
+            <input type="hidden" id="longitude" name="longitude" value="">
+            <input type="hidden" id="accuracy" name="accuracy" value="">
+
+            <label for="layout_photo" class="required-field">Layout Photo:</label>
+            <input type="file" id="layout_photo" name="layout_photo" accept="image/*" required>
+
+            <label for="district" class="required-field">District:</label>
+            <input type="text" id="district" name="district" required>
+
+            <label for="tehsil" class="required-field">Tehsil:</label>
+            <input type="text" id="tehsil" name="tehsil" required>
+
+            <label for="halka" class="required-field">Halka:</label>
+            <input type="text" id="halka" name="halka" required>
+
+            <label for="crop_name" class="required-field">Crop Name:</label>
+            <input type="text" id="crop_name" name="crop_name" required>
+
+            <label for="crop_variety">Crop Variety:</label>
+            <input type="text" id="crop_variety" name="crop_variety">
+
+            <label for="farmer_name" class="required-field">Farmer Name:</label>
+            <input type="text" id="farmer_name" name="farmer_name" required>
+
+            <label for="area_of_field" class="required-field">Area of Field:</label>
+            <input type="number" id="area_of_field" name="area_of_field" step="0.01" required>
+
+            <label for="irrigation_type" class="required-field">Irrigation Type:</label>
+            <select id="irrigation_type" name="irrigation_type" required>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="cce_date" class="required-field">CCE Date:</label>
+            <input type="date" id="cce_date" name="cce_date" required>
+
+            <label for="biomass_wt" class="required-field">Biomass Weight (Kg):</label>
+            <input type="number" id="biomass_wt" name="biomass_wt" step="0.01" required>
+
+            <label for="biomass_wt_photo" class="required-field">Biomass Weight Photo:</label>
+            <input type="file" id="biomass_wt_photo" name="biomass_wt_photo" accept="image/*" required>
+
+            <label for="biomass_moisture" class="required-field">Biomass Moisture(%):</label>
+            <input type="number" id="biomass_moisture" name="biomass_moisture" step="0.01" required>
+
+            <label for="gram_wt" class="required-field">Gram Weight (Kg):</label>
+            <input type="number" id="gram_wt" name="gram_wt" step="0.01" required>
+
+            <label for="gram_wt_photo" class="required-field">Gram Weight Photo:</label>
+            <input type="file" id="gram_wt_photo" name="gram_wt_photo" accept="image/*" required>
+
+            <label for="gram_moisture" class="required-field">Gram Moisture(%):</label>
+            <input type="number" id="gram_moisture" name="gram_moisture" step="0.01" required>
+
+            <label for="remarks" class="required-field">Remarks:</label>
+            <textarea id="remarks" name="remarks" rows="4" required></textarea>
+
+<!--            <label class="required">KML File:</label>-->
+<!--            <input type="file" name="kml_file" accept=".kml" required>-->
+
+            <div id="map"></div>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+ <!-- JS Files -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.sticky.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.stellar.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/smoothscroll.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+</body>
+</html>
